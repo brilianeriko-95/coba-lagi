@@ -208,17 +208,24 @@ let currentState = {
     currentParams: []
 };
 
-// ===== INIT =====
+// ===== INITIALIZATION =====
 window.onload = function() {
-    if (GAS_URL) {
-        document.getElementById('gasUrlInput').value = GAS_URL;
-        document.getElementById('configCard').style.display = 'none';
+    // Tampilkan URL yang tersimpan
+    const savedUrl = localStorage.getItem('gasUrl');
+    if (savedUrl) {
+        GAS_URL = savedUrl;
+        document.getElementById('gasUrlInput').value = savedUrl;
+        
+        // Update display
+        const urlDisplay = document.getElementById('urlText');
+        urlDisplay.textContent = savedUrl.length > 50 ? 
+            savedUrl.substring(0, 50) + '...' : savedUrl;
+        urlDisplay.style.color = '#10b981';
     }
     
     initAreas();
     generateTpmId();
     checkOnlineStatus();
-    updatePendingSyncUI();
     
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js')
@@ -227,16 +234,66 @@ window.onload = function() {
     }
 };
 
-// ===== CONFIG =====
+// ===== CONFIG FUNCTIONS =====
+function showConfig() {
+    // Kembali ke menu dan scroll ke config
+    showSection('menuSection');
+    
+    // Update tampilan URL saat ini
+    const urlDisplay = document.getElementById('urlText');
+    const savedUrl = localStorage.getItem('gasUrl');
+    
+    if (savedUrl) {
+        const displayUrl = savedUrl.length > 50 ? 
+            savedUrl.substring(0, 50) + '...' : savedUrl;
+        urlDisplay.textContent = displayUrl;
+        urlDisplay.style.color = '#10b981';
+    } else {
+        urlDisplay.textContent = 'Belum di-setting';
+        urlDisplay.style.color = '#ef4444';
+    }
+    
+    // Scroll ke config card
+    setTimeout(() => {
+        const configCard = document.getElementById('configCard');
+        configCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Highlight effect
+        configCard.style.border = '2px solid #3b82f6';
+        setTimeout(() => {
+            configCard.style.border = '1px solid #334155';
+        }, 1500);
+        
+        // Focus ke input
+        document.getElementById('gasUrlInput').focus();
+    }, 100);
+}
+
 function saveConfig() {
     const url = document.getElementById('gasUrlInput').value.trim();
+    
     if (!url || !url.includes('script.google.com')) {
-        showToast('URL tidak valid!', 'error');
+        showToast('❌ URL tidak valid!', 'error');
         return;
     }
+    
+    if (!url.endsWith('/exec')) {
+        showToast('❌ URL harus diakhiri dengan /exec', 'error');
+        return;
+    }
+    
     localStorage.setItem('gasUrl', url);
     GAS_URL = url;
-    location.reload();
+    
+    // Update tampilan
+    document.getElementById('urlText').textContent = 
+        url.length > 50 ? url.substring(0, 50) + '...' : url;
+    document.getElementById('urlText').style.color = '#10b981';
+    
+    showToast('✅ URL tersimpan!', 'success');
+    
+    // Clear input
+    document.getElementById('gasUrlInput').value = '';
 }
 
 async function testConnection() {
@@ -273,7 +330,6 @@ function showSection(sectionId) {
     
     if (sectionId === 'menuSection') {
         document.querySelector('.nav-item:nth-child(1)').classList.add('active');
-        updatePendingSyncUI();
     } else if (sectionId === 'tpmSection') {
         document.querySelector('.nav-item:nth-child(2)').classList.add('active');
     } else if (sectionId === 'dashboardSection') {
@@ -329,7 +385,6 @@ function selectArea(mode, area, params) {
 // ===== PARAMETER INPUT =====
 function showParameter() {
     const param = currentState.currentParams[currentState.index];
-    const prevData = getPreviousValue(param);
     
     document.getElementById('paramName').textContent = param;
     document.getElementById('paramCounter').textContent = 
@@ -338,9 +393,7 @@ function showParameter() {
     const unitMatch = param.match(/\(([^)]+)\)$/);
     document.getElementById('paramUnit').textContent = unitMatch ? unitMatch[1] : '-';
     
-    document.getElementById('paramPrev').textContent = 
-        prevData ? `Data sebelumnya: ${prevData}` : 'Data sebelumnya: -';
-    
+    document.getElementById('paramPrev').textContent = 'Data sebelumnya: -';
     document.getElementById('paramInput').value = currentState.data[param] || '';
     
     const quickActions = document.getElementById('quickActions');
@@ -397,6 +450,12 @@ function updateProgress() {
 
 // ===== SAVE FUNCTIONS =====
 async function saveLogsheet() {
+    if (!GAS_URL) {
+        showToast('URL belum dikonfigurasi!', 'error');
+        showConfig();
+        return;
+    }
+    
     const payload = {
         Timestamp: new Date().toISOString(),
         Mode: currentState.mode,
@@ -424,7 +483,13 @@ async function saveLogsheet() {
     }
 }
 
-function saveLaporan() {
+async function saveLaporan() {
+    if (!GAS_URL) {
+        showToast('URL belum dikonfigurasi!', 'error');
+        showConfig();
+        return;
+    }
+    
     const shift = document.getElementById('shiftSelect').value;
     const area = document.getElementById('areaLaporan').value;
     const detail = document.getElementById('detailLaporan').value;
@@ -442,11 +507,33 @@ function saveLaporan() {
         Detail: detail
     };
     
-    sendToSheet(payload, '✅ Laporan tersimpan!');
-    document.getElementById('detailLaporan').value = '';
+    document.getElementById('loading').classList.add('active');
+    
+    try {
+        await fetch(GAS_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        
+        document.getElementById('loading').classList.remove('active');
+        showToast('✅ Laporan tersimpan!', 'success');
+        document.getElementById('detailLaporan').value = '';
+        
+    } catch (err) {
+        document.getElementById('loading').classList.remove('active');
+        showToast('❌ Error: ' + err.message, 'error');
+    }
 }
 
-function submitAnomali() {
+async function submitAnomali() {
+    if (!GAS_URL) {
+        showToast('URL belum dikonfigurasi!', 'error');
+        showConfig();
+        return;
+    }
+    
     const id = document.getElementById('tpmId').value;
     const desc = document.getElementById('tpmDesc').value;
     
@@ -463,20 +550,6 @@ function submitAnomali() {
         Status: 'OPEN'
     };
     
-    sendToSheet(payload, '🚨 Anomali dilaporkan!');
-    
-    document.getElementById('tpmDesc').value = '';
-    document.getElementById('tpmPhoto').value = '';
-    document.getElementById('photoPreview').style.display = 'none';
-    generateTpmId();
-}
-
-async function sendToSheet(payload, successMsg) {
-    if (!GAS_URL) {
-        showToast('URL belum dikonfigurasi!', 'error');
-        return;
-    }
-    
     document.getElementById('loading').classList.add('active');
     
     try {
@@ -488,7 +561,12 @@ async function sendToSheet(payload, successMsg) {
         });
         
         document.getElementById('loading').classList.remove('active');
-        showToast(successMsg, 'success');
+        showToast('🚨 Anomali dilaporkan!', 'success');
+        
+        document.getElementById('tpmDesc').value = '';
+        document.getElementById('tpmPhoto').value = '';
+        document.getElementById('photoPreview').style.display = 'none';
+        generateTpmId();
         
     } catch (err) {
         document.getElementById('loading').classList.remove('active');
@@ -501,11 +579,6 @@ function generateTpmId() {
     const now = new Date();
     const id = 'BOT-' + now.toTimeString().slice(0,8).replace(/:/g,'');
     document.getElementById('tpmId').value = id;
-}
-
-function getPreviousValue(param) {
-    // Simplified - bisa dikembangkan dengan localStorage
-    return null;
 }
 
 function previewPhoto(input) {
@@ -525,17 +598,8 @@ function showRekap(type) {
 }
 
 function refreshDashboard() {
-    // Simplified - bisa dikembangkan
-    document.getElementById('ticketList').innerHTML = '<p style="text-align: center; color: var(--text-muted);">Tidak ada tiket aktif</p>';
-}
-
-function updatePendingSyncUI() {
-    // Simplified
-    document.getElementById('pendingSyncCard').style.display = 'none';
-}
-
-function forceSync() {
-    showToast('Sinkronisasi...', 'success');
+    document.getElementById('ticketList').innerHTML = 
+        '<p style="text-align: center; color: var(--text-muted);">Tidak ada tiket aktif</p>';
 }
 
 function checkOnlineStatus() {
@@ -567,6 +631,7 @@ function showToast(message, type = 'success') {
     setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
+// ===== EVENT LISTENERS =====
 window.addEventListener('online', () => {
     document.getElementById('offlineBanner').classList.remove('show');
     checkOnlineStatus();
