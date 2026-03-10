@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <title>Plant Monitoring System</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2921/2921822.png">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: #334155;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 16px;
+            padding-bottom: 80px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            margin: -16px -16px 20px -16px;
+            padding: 24px 16px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 0.875rem;
+        }
+        
+        .card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card-title {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        
+        .menu-btn {
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            color: var(--text);
+        }
+        
+        .menu-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .menu-btn.active {
+            background: linear-gradient(145deg, var(--primary), var(--primary-dark));
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+        }
+        
+        .menu-icon {
+            font-size: 2rem;
+        }
+        
+        .menu-text {
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        label {
+            display: block;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            background: #0f172a;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            color: var(--text);
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .input-group input {
+            flex: 1;
+        }
+        
+        .unit {
+            background: var(--border);
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            min-width: 60px;
+            text-align: center;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger), #dc2626);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning), #d97706);
+            color: white;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, var(--success), #059669);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: var(--border);
+            color: var(--text);
+        }
+        
+        .btn:active {
+            transform: scale(0.98);
+        }
+        
+        .param-card {
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+        
+        .param-name {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+        
+        .param-prev {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-open {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+        
+        .status-progress {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+            border: 1px solid var(--warning);
+        }
+        
+        .status-closed {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+        
+        .ticket {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .ticket-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .ticket-id {
+            font-family: monospace;
+            font-size: 0.875rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .ticket-body {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+        
+        .ticket-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .ticket-actions button {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .nav-bottom {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-card);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0;
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+        }
+        
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: all 0.3s;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+        }
+        
+        .nav-icon {
+            font-size: 1.5rem;
+        }
+        
+        .nav-text {
+            font-size: 0.625rem;
+            font-weight: 600;
+        }
+        
+        .progress-container {
+            background: var(--border);
+            border-radius: 10px;
+            height: 8px;
+            overflow: hidden;
+            margin: 16px 0;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            transition: width 0.3s;
+        }
+        
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: var(--bg-card);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 9999;
+            transition: transform 0.3s;
+            border: 1px solid var(--border);
+        }
+        
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        .toast.success { border-left: 4px solid var(--success); }
+        .toast.error { border-left: 4px solid var(--danger); }
+        .toast.warning { border-left: 4px solid var(--warning); }
+        
+        .offline-banner {
+            background: var(--warning);
+            color: #000;
+            text-align: center;
+            padding: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            display: none;
+        }
+        
+        .offline-banner.show {
+            display: block;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .area-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .area-item {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        
+        .area-item:active {
+            transform: scale(0.98);
+        }
+        
+        .area-item.selected {
+            border-color: var(--primary);
+            background: rgba(59, 130, 246, 0.1);
+        }
+        
+        .quick-actions {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            margin-bottom: 16px;
+        }
+        
+        .quick-btn {
+            white-space: nowrap;
+            padding: 10px 16px;
+            background: var(--border);
+            border: none;
+            border-radius: 20px;
+            color: var(--text);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .quick-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .section {
+            display: none;
+        }
+        
+        .section.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .photo-upload {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .photo-upload:active {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: var(--primary);
+        }
+        
+        .photo-preview {
+            width: 100%;
+            border-radius: 12px;
+            margin-top: 12px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-box {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+        
+        .stat-number {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        
+        .stat-open { color: var(--danger); }
+        .stat-progress { color: var(--warning); }
+        .stat-closed { color: var(--success); }
+
+        .sync-status {
+            position: fixed;
+            top: 8px;
+            right: 8px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            z-index: 100;
+        }
+
+        .sync-status.online {
+            color: var(--success);
+            border-color: var(--success);
+        }
+
+        .sync-status.offline {
+            color: var(--warning);
+            border-color: var(--warning);
+        }
+
+        .sync-status.syncing {
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        .setup-alert {
+            background: rgba(239, 68, 68, 0.2);
+            border: 2px solid var(--danger);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        
+        .setup-alert h3 {
+            color: var(--danger);
+            margin-bottom: 8px;
+        }
+        
+        .setup-alert code {
+            background: var(--bg-dark);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.875rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.95);
+            z-index: 9998;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading.active {
+            display: flex;
+        }
+
+        .loading p {
+            margin-top: 16px;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-banner" id="offlineBanner">
+        ⚠️ Mode Offline - Data akan disinkronkan saat online
+    </div>
+
+    <!-- Setup Alert -->
+    <div class="setup-alert" id="setupAlert" style="display: none;">
+        <h3>⚠️ Setup Required</h3>
+        <p>Edit file <code>config.js</code> dan ganti <code>GAS_URL</code> dengan URL Web App Anda.</p>
+    </div>
+
+    <!-- Sync Status -->
+    <div class="sync-status offline" id="syncStatus">
+        <span id="syncIcon">📴</span>
+        <span id="syncText">Offline</span>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>Memproses...</p>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast">
+        <span id="toastIcon">✓</span>
+        <span id="toastMessage">Operasi berhasil</span>
+    </div>
+
+    <!-- MAIN MENU -->
+    <div class="section active" id="menuSection">
+        <div class="header">
+            <h1>🏭 Plant Monitoring</h1>
+            <p>Sistem Logsheet & Anomali</p>
+        </div>
+        
+        <div class="container">
+            <div class="card">
+                <div class="card-title">📊 Menu Utama</div>
+                <div class="menu-grid">
+                    <div class="menu-btn" onclick="showSection('turbineSection')">
+                        <span class="menu-icon">⚙️</span>
+                        <span class="menu-text">Logsheet Turbine</span>
+                    </div>
+                    <div class="menu-btn" onclick="showSection('ctSection')">
+                        <span class="menu-icon">🌀</span>
+                        <span class="menu-text">Logsheet CT</span>
+                    </div>
+                    <div class="menu-btn" onclick="showSection('oliSection')">
+                        <span class="menu-icon">🛢️</span>
+                        <span class="menu-text">Logsheet Oli</span>
+                    </div>
+                    <div class="menu-btn" onclick="showSection('laporanSection')">
+                        <span class="menu-icon">📝</span>
+                        <span class="menu-text">Input Laporan</span>
+                    </div>
+                    <div class="menu-btn" onclick="showSection('tpmSection')">
+                        <span class="menu-icon">⚠️</span>
+                        <span class="menu-text">Unsafe/Anomali</span>
+                    </div>
+                    <div class="menu-btn" onclick="showSection('dashboardSection')">
+                        <span class="menu-icon">📈</span>
+                        <span class="menu-text">Dashboard</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">📋 Rekap Data</div>
+                <div class="menu-grid">
+                    <div class="menu-btn btn-secondary" onclick="showRekap('CT')">
+                        <span class="menu-icon">📊</span>
+                        <span class="menu-text">Rekap CT</span>
+                    </div>
+                    <div class="menu-btn btn-secondary" onclick="showRekap('TURBINE')">
+                        <span class="menu-icon">📊</span>
+                        <span class="menu-text">Rekap Turbine</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pending Sync -->
+            <div class="card" id="pendingSyncCard" style="display: none;">
+                <div class="card-title">🔄 Menunggu Sinkronisasi</div>
+                <div id="pendingSyncList"></div>
+                <button class="btn btn-primary" onclick="forceSync()">🔄 Sync Sekarang</button>
+            </div>
+
+            <!-- Config -->
+            <div class="card" id="configCard">
+                <div class="card-title">⚙️ Konfigurasi Server</div>
+                <input type="url" id="gasUrlInput" class="form-group" style="width: 100%; padding: 12px; background: #0f172a; border: 2px solid var(--border); border-radius: 10px; color: var(--text); margin-bottom: 12px;" placeholder="https://script.google.com/macros/s/.../exec">
+                <div class="menu-grid">
+                    <button class="btn btn-secondary" onclick="testConnection()" style="margin-bottom: 0;">🧪 Test</button>
+                    <button class="btn btn-primary" onclick="saveConfig()" style="margin-bottom: 0;">💾 Simpan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TURBINE SECTION -->
+    <div class="section" id="turbineSection">
+        <div class="header">
+            <h1>⚙️ Logsheet Turbine</h1>
+            <p>Pilih Area Monitoring</p>
+        </div>
+        <div class="container">
+            <div class="progress-container">
+                <div class="progress-bar" id="turbineProgress" style="width: 0%"></div>
+            </div>
+            <div class="area-list" id="turbineAreas"></div>
+            <button class="btn btn-secondary" onclick="showSection('menuSection')">← Kembali</button>
+        </div>
+    </div>
+
+    <!-- CT SECTION -->
+    <div class="section" id="ctSection">
+        <div class="header">
+            <h1>🌀 Logsheet CT</h1>
+            <p>Pilih Area Cooling Tower</p>
+        </div>
+        <div class="container">
+            <div class="progress-container">
+                <div class="progress-bar" id="ctProgress" style="width: 0%"></div>
+            </div>
+            <div class="area-list" id="ctAreas"></div>
+            <button class="btn btn-secondary" onclick="showSection('menuSection')">← Kembali</button>
+        </div>
+    </div>
+
+    <!-- OLI SECTION -->
+    <div class="section" id="oliSection">
+        <div class="header">
+            <h1>🛢️ Logsheet Oli</h1>
+            <p>Pilih Area Gearbox</p>
+        </div>
+        <div class="container">
+            <div class="area-list" id="oliAreas"></div>
+            <button class="btn btn-secondary" onclick="showSection('menuSection')">← Kembali</button>
+        </div>
+    </div>
+
+    <!-- INPUT PARAMETER -->
+    <div class="section" id="inputSection">
+        <div class="header">
+            <h1 id="inputTitle">📊 Input Parameter</h1>
+            <p id="inputSubtitle">Area: -</p>
+        </div>
+        <div class="container">
+            <div class="card">
+                <div class="card-title" id="paramCounter">Parameter 1/10</div>
+                <div class="param-card">
+                    <div class="param-name" id="paramName">Loading...</div>
+                    <div class="input-group">
+                        <input type="text" id="paramInput" placeholder="Masukkan nilai" inputmode="decimal">
+                        <span class="unit" id="paramUnit">-</span>
+                    </div>
+                    <div class="param-prev" id="paramPrev">Data sebelumnya: -</div>
+                </div>
+                
+                <div class="quick-actions" id="quickActions">
+                    <button class="quick-btn" onclick="setQuickValue('ON')">ON</button>
+                    <button class="quick-btn" onclick="setQuickValue('OFF')">OFF</button>
+                    <button class="quick-btn" onclick="setQuickValue('NORMAL')">NORMAL</button>
+                    <button class="quick-btn" onclick="setQuickValue('ERROR')">ERROR</button>
+                </div>
+
+                <button class="btn btn-primary" onclick="nextParameter()">Simpan & Lanjut →</button>
+                <button class="btn btn-secondary" onclick="prevParameter()">← Kembali</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LAPORAN SECTION -->
+    <div class="section" id="laporanSection">
+        <div class="header">
+            <h1>📝 Input Laporan</h1>
+            <p>Laporan Shift Harian</p>
+        </div>
+        <div class="container">
+            <div class="card">
+                <div class="form-group">
+                    <label>Pilih Shift</label>
+                    <select id="shiftSelect">
+                        <option value="PAGI">Shift Pagi (07:00-15:00)</option>
+                        <option value="SORE">Shift Sore (15:00-23:00)</option>
+                        <option value="MALAM">Shift Malam (23:00-07:00)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Pilih Area</label>
+                    <select id="areaLaporan">
+                        <option value="CT">Cooling Tower</option>
+                        <option value="TURBINE">Turbine</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Detail Pekerjaan</label>
+                    <textarea id="detailLaporan" rows="4" placeholder="Deskripsikan pekerjaan yang dilakukan..."></textarea>
+                </div>
+                
+                <button class="btn btn-primary" onclick="saveLaporan()">💾 Simpan Laporan</button>
+            </div>
+            <button class="btn btn-secondary" onclick="showSection('menuSection')">← Kembali</button>
+        </div>
+    </div>
+
+    <!-- ANOMALI SECTION -->
+    <div class="section" id="tpmSection">
+        <div class="header">
+            <h1>⚠️ Lapor Anomali</h1>
+            <p>Temuan Unsafe Condition</p>
+        </div>
+        <div class="container">
+            <div class="card">
+                <div class="form-group">
+                    <label>ID Tiket (Auto)</label>
+                    <input type="text" id="tpmId" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label>Keterangan Temuan</label>
+                    <textarea id="tpmDesc" rows="3" placeholder="Jelaskan temuan anomali..."></textarea>
+                </div>
+                
+                <div class="photo-upload" onclick="document.getElementById('tpmPhoto').click()">
+                    <div style="font-size: 3rem; margin-bottom: 8px;">📷</div>
+                    <div>Tap untuk ambil foto</div>
+                    <input type="file" id="tpmPhoto" accept="image/*" capture="environment" style="display: none" onchange="previewPhoto(this)">
+                </div>
+                <img id="photoPreview" class="photo-preview" style="display: none;">
+                
+                <button class="btn btn-danger" onclick="submitAnomali()">🚨 Kirim Laporan</button>
+            </div>
+            <button class="btn btn-secondary" onclick="showSection('menuSection')">← Kembali</button>
+        </div>
+    </div>
+
+    <!-- DASHBOARD SECTION -->
+    <div class="section" id="dashboardSection">
+        <div class="header">
+            <h1>📊 Dashboard</h1>
+            <p>Monitoring Tiket Real-time</p>
+        </div>
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-number stat-open" id="statOpen">0</div>
+                    <div class="stat-label">Open</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number stat-progress" id="statProgress">0</div>
+                    <div class="stat-label">Progress</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number stat-closed" id="statClosed">0</div>
+                    <div class="stat-label">Closed</div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">🔴 Tiket Perlu Tindakan</div>
+                <div id="ticketList">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+            
+            <button class="btn btn-primary" onclick="refreshDashboard()">🔄 Refresh Data</button>
+            <button class="btn btn-secondary" onclick="showSection('menuSection')">← Kembali</button>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="nav-bottom">
+        <div class="nav-item active" onclick="showSection('menuSection')">
+            <span class="nav-icon">🏠</span>
+            <span class="nav-text">Home</span>
+        </div>
+        <div class="nav-item" onclick="showSection('tpmSection')">
+            <span class="nav-icon">⚠️</span>
+            <span class="nav-text">Anomali</span>
+        </div>
+        <div class="nav-item" onclick="showSection('dashboardSection')">
+            <span class="nav-icon">📊</span>
+            <span class="nav-text">Dashboard</span>
+        </div>
+    </nav>
+
+    <script src="app.js"></script>
+</body>
+</html>
