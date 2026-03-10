@@ -54,6 +54,7 @@
             padding: 24px 16px;
             text-align: center;
             box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+            position: relative;
         }
         
         .header h1 {
@@ -67,6 +68,25 @@
             font-size: 0.875rem;
         }
         
+        .btn-settings {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+        }
+        
+        .btn-settings:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
         .card {
             background: var(--bg-card);
             border-radius: 16px;
@@ -74,6 +94,7 @@
             margin-bottom: 16px;
             border: 1px solid var(--border);
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            transition: border-color 0.3s;
         }
         
         .card-title {
@@ -539,7 +560,7 @@
         .sync-status {
             position: fixed;
             top: 8px;
-            right: 8px;
+            left: 8px;
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 20px;
@@ -614,17 +635,22 @@
             margin-top: 16px;
             color: var(--text-muted);
         }
+        
+        .current-url {
+            background: #0f172a;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 12px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            word-break: break-all;
+        }
     </style>
 </head>
 <body>
     <div class="offline-banner" id="offlineBanner">
         ⚠️ Mode Offline - Data akan disinkronkan saat online
-    </div>
-
-    <!-- Setup Alert -->
-    <div class="setup-alert" id="setupAlert" style="display: none;">
-        <h3>⚠️ Setup Required</h3>
-        <p>Edit file <code>config.js</code> dan ganti <code>GAS_URL</code> dengan URL Web App Anda.</p>
     </div>
 
     <!-- Sync Status -->
@@ -648,6 +674,9 @@
     <!-- MAIN MENU -->
     <div class="section active" id="menuSection">
         <div class="header">
+            <button class="btn-settings" onclick="showConfig()">
+                ⚙️ Ganti URL
+            </button>
             <h1>🏭 Plant Monitoring</h1>
             <p>Sistem Logsheet & Anomali</p>
         </div>
@@ -697,17 +726,20 @@
                 </div>
             </div>
 
-            <!-- Pending Sync -->
-            <div class="card" id="pendingSyncCard" style="display: none;">
-                <div class="card-title">🔄 Menunggu Sinkronisasi</div>
-                <div id="pendingSyncList"></div>
-                <button class="btn btn-primary" onclick="forceSync()">🔄 Sync Sekarang</button>
-            </div>
-
-            <!-- Config -->
+            <!-- Config Card -->
             <div class="card" id="configCard">
                 <div class="card-title">⚙️ Konfigurasi Server</div>
-                <input type="url" id="gasUrlInput" class="form-group" style="width: 100%; padding: 12px; background: #0f172a; border: 2px solid var(--border); border-radius: 10px; color: var(--text); margin-bottom: 12px;" placeholder="https://script.google.com/macros/s/.../exec">
+                
+                <!-- Tampilkan URL saat ini -->
+                <div class="current-url" id="currentUrlDisplay">
+                    URL: <span id="urlText">Belum di-setting</span>
+                </div>
+                
+                <input type="url" 
+                       id="gasUrlInput" 
+                       placeholder="https://script.google.com/macros/s/.../exec"
+                       style="width: 100%; padding: 12px; background: #0f172a; border: 2px solid var(--border); border-radius: 10px; color: var(--text); margin-bottom: 12px;">
+                
                 <div class="menu-grid">
                     <button class="btn btn-secondary" onclick="testConnection()" style="margin-bottom: 0;">🧪 Test</button>
                     <button class="btn btn-primary" onclick="saveConfig()" style="margin-bottom: 0;">💾 Simpan</button>
@@ -719,6 +751,9 @@
     <!-- TURBINE SECTION -->
     <div class="section" id="turbineSection">
         <div class="header">
+            <button class="btn-settings" onclick="showConfig()">
+                ⚙️ Ganti URL
+            </button>
             <h1>⚙️ Logsheet Turbine</h1>
             <p>Pilih Area Monitoring</p>
         </div>
@@ -734,6 +769,9 @@
     <!-- CT SECTION -->
     <div class="section" id="ctSection">
         <div class="header">
+            <button class="btn-settings" onclick="showConfig()">
+                ⚙️ Ganti URL
+            </button>
             <h1>🌀 Logsheet CT</h1>
             <p>Pilih Area Cooling Tower</p>
         </div>
@@ -749,6 +787,9 @@
     <!-- OLI SECTION -->
     <div class="section" id="oliSection">
         <div class="header">
+            <button class="btn-settings" onclick="showConfig()">
+                ⚙️ Ganti URL
+            </button>
             <h1>🛢️ Logsheet Oli</h1>
             <p>Pilih Area Gearbox</p>
         </div>
@@ -761,6 +802,9 @@
     <!-- INPUT PARAMETER -->
     <div class="section" id="inputSection">
         <div class="header">
+            <button class="btn-settings" onclick="showConfig()">
+                ⚙️ Ganti URL
+            </button>
             <h1 id="inputTitle">📊 Input Parameter</h1>
             <p id="inputSubtitle">Area: -</p>
         </div>
@@ -792,6 +836,9 @@
     <!-- LAPORAN SECTION -->
     <div class="section" id="laporanSection">
         <div class="header">
+            <button class="btn-settings" onclick="showConfig()">
+                ⚙️ Ganti URL
+            </button>
             <h1>📝 Input Laporan</h1>
             <p>Laporan Shift Harian</p>
         </div>
@@ -828,6 +875,9 @@
     <!-- ANOMALI SECTION -->
     <div class="section" id="tpmSection">
         <div class="header">
+            <button class="btn-settings" onclick="showConfig()">
+                ⚙️ Ganti URL
+            </button>
             <h1>⚠️ Lapor Anomali</h1>
             <p>Temuan Unsafe Condition</p>
         </div>
@@ -859,6 +909,9 @@
     <!-- DASHBOARD SECTION -->
     <div class="section" id="dashboardSection">
         <div class="header">
+            <button class="btn-settings" onclick="showConfig()">
+                ⚙️ Ganti URL
+            </button>
             <h1>📊 Dashboard</h1>
             <p>Monitoring Tiket Real-time</p>
         </div>
